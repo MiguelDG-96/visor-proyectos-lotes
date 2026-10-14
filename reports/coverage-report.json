@@ -1,0 +1,27 @@
+{
+  "file": "03- LOTIZACION UNIFICADO.dxf",
+  "generatedAt": "2026-10-13T23:34:38.944Z",
+  "totalEntitiesPreserved": 7759,
+  "coveragePercentage": "100.0%",
+  "dxfParserEntitiesCount": 7747,
+  "supplementaryScannerEntitiesCount": 12,
+  "omittedEntitiesPreserved": {
+    "HATCH": 6,
+    "OLE2FRAME": 4,
+    "VIEWPORT": 2
+  },
+  "layersCount": 29,
+  "blocksCount": 31,
+  "units": {
+    "declaredUnits": "inches (1)",
+    "measurement": "imperial (0)",
+    "effectiveUnits": "meters (UTM 18S WGS84, documentado)",
+    "acadVersion": "AC1018"
+  },
+  "bbox": {
+    "minX": -32081.81368802564,
+    "maxX": 280406.0914163205,
+    "minY": -81.05302154645324,
+    "maxY": 9336832.314625617
+  }
+}

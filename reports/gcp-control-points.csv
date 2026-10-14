@@ -1,0 +1,6 @@
+ID,NAME,SOURCE_X,SOURCE_Y,TARGET_X,TARGET_Y,IS_CHECK_POINT,DESCRIPTION
+"GCP-01-NW","Vértice Nor-Oeste Proyecto (Matriz)",279540.218,9336580.45,279540.218,9336580.45,0,"Intersección Vía Norte y lindero predial matriz"
+"GCP-02-NE","Vértice Nor-Este Proyecto",279780.5,9336580.45,279780.5,9336580.45,0,"Esquina de manzana C norte"
+"GCP-03-SW","Vértice Sur-Oeste (Calle.-A con Pasaje 5)",279546.485,9335918.273,279546.485,9335918.273,0,"Esquina Noroeste del Lote 1 Mz-Z"
+"GCP-04-SE","Vértice Sur-Este Proyecto",280050,9335920,280050,9335920,0,"Límite sureste del proyecto con predio colindante"
+"CHK-01-CENTER","Punto de Chequeo Centro (Lote D528)",279600,9336200,279600,9336200,1,"Vértice suroeste del lote de calibración D528"

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visor CAD Inmobiliario — Inspección Multicapa & GIS (Fase 5)</title>
+  <script type="module" crossorigin src="/assets/index-DhiLUww8.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-DM30ucEm.css">
+</head>
+<body>
+  <div id="sidebar">
+    <div class="sidebar-header">
+      <h1>Visor CAD Inmobiliario</h1>
+      <p>Control Multicapa & Georreferenciación (Fase 5)</p>
+    </div>
+
+    <!-- Buscador y Herramientas -->
+    <div class="search-panel">
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Buscar lote ej: MZ-Z 1, D528, 18...">
+        <button id="btnSearch" class="btn btn-small">Buscar</button>
+      </div>
+      <div class="quick-nav">
+        <select id="manzanaSelect" class="form-select">
+          <option value="">-- Ir a Manzana --</option>
+        </select>
+        <button id="btnMeasure" class="btn btn-measure">📐 Regla CAD</button>
+      </div>
+      <div id="measurePill" class="measure-pill" style="display: none;">
+        <span>📏 Distancia: <strong id="measureVal">0.00 m</strong></span>
+        <button id="btnCancelMeasure" class="btn-pill-cancel">✕</button>
+      </div>
+    </div>
+
+    <!-- Gestor de Capas -->
+    <div class="layers-panel">
+      <div class="panel-header">
+        <span class="panel-title">Capas CAD del Plano</span>
+        <div class="layer-batch-actions">
+          <button id="btnAllLayers" class="btn-link">Todas</button>
+          <span style="color: #555;">|</span>
+          <button id="btnNoneLayers" class="btn-link">Ninguna</button>
+        </div>
+      </div>
+      <div id="layersList" class="layers-list">
+        <!-- Renderizado dinámicamente por app.js -->
+      </div>
+    </div>
+
+    <!-- Selector de Modo de Geometría -->
+    <div class="mode-panel">
+      <div class="mode-title">Modo de Geometría</div>
+      <div class="mode-options">
+        <label class="mode-radio">
+          <input type="radio" name="viewMode" value="validated" id="modeValidated" checked>
+          <span><strong>Validado & Corregido</strong> (Auditable)</span>
+        </label>
+        <label class="mode-radio">
+          <input type="radio" name="viewMode" value="raw" id="modeRaw">
+          <span><strong>Crudo DXF</strong> (Original sin corregir)</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Accesos Rápidos de Vista -->
+    <div class="controls-panel">
+      <button class="btn btn-primary" id="btnMzZ">📍 Ver Mz-Z (Lotes 1 a 7)</button>
+      <button class="btn" id="btnFit">Ajustar Vista General</button>
+      <button class="btn btn-secondary" id="btnNorth">Sector Norte (Mz-D)</button>
+      <button class="btn btn-secondary" id="btnD1D9">MZ-B Lt 18</button>
+      <button class="btn btn-secondary" id="btnD528">Lote D528</button>
+    </div>
+
+    <!-- Exportación GIS Georreferenciada -->
+    <div class="export-panel">
+      <div class="panel-header">
+        <span class="panel-title">Exportación GIS (Fase 5)</span>
+      </div>
+      <div class="export-buttons">
+        <button class="btn btn-secondary" id="btnExportGeoJson" style="width: 100%; margin-bottom: 6px; font-size: 11px;">📥 Descargar GeoJSON (EPSG:4326)</button>
+        <button class="btn btn-secondary" id="btnExportGcp" style="width: 100%; font-size: 11px;">📥 Descargar Puntos GCP (CSV)</button>
+      </div>
+    </div>
+
+    <!-- Leyenda de Estados -->
+    <div class="legend-panel">
+      <div class="legend-item">
+        <div class="legend-color" style="background: rgba(59, 130, 246, 0.4); border: 1px solid #3b82f6;"></div>
+        <span>Cerrado formal (normal)</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: rgba(56, 189, 248, 0.4); border: 2px solid #38bdf8;"></div>
+        <span>Snap closure (Lote 1 DA92, 1.6cm)</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: rgba(16, 185, 129, 0.4); border: 2px solid #10b981;"></div>
+        <span>Reconstruido asistido (Lote 2)</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="border: 2px solid #f97316;"></div>
+        <span>Polilínea abierta (borrador/crudo)</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="border: 2px solid #f43f5e;"></div>
+        <span>Perímetro del Proyecto (Matriz)</span>
+      </div>
+    </div>
+
+    <!-- Estadísticas del Proyecto -->
+    <div class="stats-panel">
+      <div class="stat-row">
+        <span class="stat-label">Total Entidades Preservadas:</span>
+        <span class="stat-value" style="color: #60a5fa;">7,759 (100%)</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Lotes Residenciales:</span>
+        <span class="stat-value" id="statTotal">-</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Con número asociado:</span>
+        <span class="stat-value" style="color: #a78bfa;" id="statNumbered">-</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Reparados / Reconstruidos:</span>
+        <span class="stat-value" style="color: #34d399;" id="statRepaired">-</span>
+      </div>
+    </div>
+
+    <!-- Detalle de Entidad Seleccionada -->
+    <div class="details-panel">
+      <div class="details-title">Ficha Técnica del Lote</div>
+      <div id="detailsContent">
+        <p style="color: #666; font-style: italic;">Haz clic en cualquier polígono del plano para inspeccionar sus medidas y metadatos.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="canvas-container">
+    <canvas id="cadCanvas"></canvas>
+    <div class="viewport-info" id="coordsDisplay">X: - | Y: - (UTM 18S)</div>
+  </div>
+
+</body>
+</html>
