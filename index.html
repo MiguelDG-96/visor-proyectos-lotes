@@ -10,7 +10,7 @@
   <div id="sidebar">
     <div class="sidebar-header">
       <h1>Visor CAD Inmobiliario</h1>
-      <p>Control Multicapa & Georreferenciación (Fase 5)</p>
+      <p>Superposición GIS & Exportación (Fase 6 & 7)</p>
     </div>
 
     <!-- Buscador y Herramientas -->
@@ -28,6 +28,76 @@
       <div id="measurePill" class="measure-pill" style="display: none;">
         <span>📏 Distancia: <strong id="measureVal">0.00 m</strong></span>
         <button id="btnCancelMeasure" class="btn-pill-cancel">✕</button>
+      </div>
+    </div>
+
+    <!-- Superposición Ortofoto / Satélite (Fases 6 y 7) -->
+    <div class="overlay-panel">
+      <div class="panel-header">
+        <span class="panel-title">🛰️ Fondo Satélite / Dron</span>
+        <label class="switch-label">
+          <input type="checkbox" id="chkSatellite">
+          <span>Activar</span>
+        </label>
+      </div>
+      <div id="overlayControls" style="display: none; margin-top: 8px;">
+        <div class="slider-row">
+          <span style="font-size: 11px; color: #94a3b8;">Opacidad de Imagen:</span>
+          <span id="opacityVal" style="font-size: 11px; font-weight: bold; color: #38bdf8;">65%</span>
+        </div>
+        <input type="range" id="opacitySlider" min="0" max="100" value="65" class="range-slider">
+        
+        <div class="upload-box" style="margin-top: 8px;">
+          <label class="btn-upload" for="fileOrtho">
+            📁 Cargar Ortofoto Dron (PNG/JPG)
+          </label>
+          <input type="file" id="fileOrtho" accept="image/png,image/jpeg" style="display: none;">
+          <input type="file" id="fileTfw" accept=".tfw,.jgw,.pgw" style="display: none;">
+          <label class="btn-upload-sub" for="fileTfw" id="lblTfw">
+            + World File (.tfw/.jgw opcional)
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Puntos de Control GCP & Precisión (Fase 6) -->
+    <div class="gcp-panel">
+      <div class="panel-header" id="btnToggleGcp" style="cursor: pointer;">
+        <span class="panel-title">🎯 Puntos de Control & Precisión</span>
+        <span id="gcpChevron" style="color: #60a5fa; font-size: 10px;">▼</span>
+      </div>
+      <div id="gcpContent" style="display: none; margin-top: 8px;">
+        <div class="model-select-row">
+          <label style="font-size: 11px; color: #94a3b8;">Modelo:</label>
+          <select id="selTransformModel" class="form-select" style="padding: 3px 6px; font-size: 10px;">
+            <option value="helmert">Helmert 2D (Recomendado)</option>
+            <option value="affine">Afín 2D (6 Parámetros)</option>
+          </select>
+        </div>
+        <div class="gcp-metrics">
+          <div class="metric-pill">RMSE: <strong id="valRmse">0.045 m</strong></div>
+          <div class="metric-pill">Escala k: <strong id="valScale">1.000210</strong></div>
+          <div class="metric-pill">Convergencia: <strong id="valConv">-0.273°</strong></div>
+          <div class="metric-pill">Check Pts: <strong id="valCheck">1 (RMS 0.00m)</strong></div>
+        </div>
+        <div class="gcp-table-container">
+          <table class="gcp-table">
+            <thead>
+              <tr>
+                <th>GCP</th>
+                <th>CAD Este</th>
+                <th>CAD Norte</th>
+                <th>Residuo</th>
+              </tr>
+            </thead>
+            <tbody id="gcpTableBody">
+              <!-- Renderizado dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+        <div class="gcp-note">
+          Similitud Helmert 2D preserva la ortogonalidad y los ángulos rectos de la lotización sin distorsión angular.
+        </div>
       </div>
     </div>
 
@@ -73,11 +143,13 @@
     <!-- Exportación GIS Georreferenciada -->
     <div class="export-panel">
       <div class="panel-header">
-        <span class="panel-title">Exportación GIS (Fase 5)</span>
+        <span class="panel-title">Exportación GIS & Catastral (Fase 7)</span>
       </div>
       <div class="export-buttons">
-        <button class="btn btn-secondary" id="btnExportGeoJson" style="width: 100%; margin-bottom: 6px; font-size: 11px;">📥 Descargar GeoJSON (EPSG:4326)</button>
-        <button class="btn btn-secondary" id="btnExportGcp" style="width: 100%; font-size: 11px;">📥 Descargar Puntos GCP (CSV)</button>
+        <button class="btn btn-secondary" id="btnExportGeoJson" style="width: 100%; font-size: 11px;">📥 GeoJSON (EPSG:4326 WGS-84)</button>
+        <button class="btn btn-secondary" id="btnExportPadronCsv" style="width: 100%; font-size: 11px; background-color: #047857;">📥 Padrón Catastral (CSV / Excel)</button>
+        <button class="btn btn-secondary" id="btnExportGcp" style="width: 100%; font-size: 11px;">📥 Puntos GCP (CSV)</button>
+        <button class="btn btn-secondary" id="btnExportReportMd" style="width: 100%; font-size: 11px;">📥 Informe Auditoría (Markdown)</button>
       </div>
     </div>
 

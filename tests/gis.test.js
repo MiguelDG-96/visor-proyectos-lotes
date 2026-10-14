@@ -167,3 +167,4 @@ describe('Affine 2D & GCP Manager Tests (Fase 5)', () => {
     assert.ok(result.geoJson.features[0].geometry.coordinates[0][0][0] < -70);
   });
 });
+

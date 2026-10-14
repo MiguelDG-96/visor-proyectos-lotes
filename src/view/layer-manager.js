@@ -83,6 +83,14 @@ export class LayerManager {
         visible: false,
         color: '#fbbf24',
         description: 'Dimensiones lineales y áreas rotuladas'
+      },
+      ortofoto: {
+        id: 'ortofoto',
+        name: 'Ortofoto / Satélite',
+        category: 'imagen',
+        visible: false,
+        color: '#10b981',
+        description: 'Imagen aérea o satelital georreferenciada de fondo'
       }
     };
 

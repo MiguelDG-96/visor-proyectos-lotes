@@ -105,3 +105,4 @@ El plano CAD presenta correspondencia topográfica y geométrica con el PDF del 
     json: JSON.stringify(jsonReport, null, 2)
   };
 }
+

@@ -31,3 +31,4 @@ export function exportCadInventoryJson(cadDocument, options = {}) {
 
   return JSON.stringify(exportPayload, null, 2);
 }
+

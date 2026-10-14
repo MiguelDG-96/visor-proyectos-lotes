@@ -109,3 +109,4 @@ export class WorldFile {
     return ((gsdX + gsdY) / 2) * 100;
   }
 }
+

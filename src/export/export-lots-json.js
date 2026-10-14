@@ -85,3 +85,4 @@ export function exportLotsJson(lotCandidates, metadata = {}) {
 
   return JSON.stringify(payload, null, 2);
 }
+

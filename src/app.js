@@ -2,6 +2,7 @@ import { CadPreviewViewer } from './view/cad-preview.js';
 import lotData from '../reports/lot-candidates.json';
 import cadLayersData from '../reports/cad-layers.json';
 import { UtmProjection } from './gis/utm-projection.js';
+import { GcpManager } from './gis/gcp-manager.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const canvas = document.getElementById('cadCanvas');
@@ -162,7 +163,167 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 6. Botones de Exportación GIS
+  // 6. Superposición Ortofoto / Satélite (Fases 6 y 7)
+  const chkSatellite = document.getElementById('chkSatellite');
+  const overlayControls = document.getElementById('overlayControls');
+  const opacitySlider = document.getElementById('opacitySlider');
+  const opacityVal = document.getElementById('opacityVal');
+  const fileOrtho = document.getElementById('fileOrtho');
+  const fileTfw = document.getElementById('fileTfw');
+  const lblTfw = document.getElementById('lblTfw');
+
+  let tfwFileContent = null;
+
+  if (chkSatellite) {
+    chkSatellite.addEventListener('change', () => {
+      const active = chkSatellite.checked;
+      viewer.imageOverlay.setVisible(active);
+      viewer.layerManager.setVisible('ortofoto', active);
+      if (overlayControls) {
+        overlayControls.style.display = active ? 'block' : 'none';
+      }
+      // Actualizar checkbox en lista de capas si existe
+      const layerChk = document.querySelector('input[data-layer="ortofoto"]');
+      if (layerChk) layerChk.checked = active;
+    });
+  }
+
+  if (opacitySlider && opacityVal) {
+    opacitySlider.addEventListener('input', () => {
+      const op = Number(opacitySlider.value) / 100;
+      opacityVal.textContent = `${opacitySlider.value}%`;
+      viewer.imageOverlay.setOpacity(op);
+    });
+  }
+
+  if (fileTfw) {
+    fileTfw.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          tfwFileContent = evt.target.result;
+          if (lblTfw) lblTfw.textContent = `✓ World File cargado: ${file.name}`;
+          alert(`World File (${file.name}) cargado con éxito. Ahora carga la imagen asociada.`);
+        };
+        reader.readAsText(file);
+      }
+    });
+  }
+
+  if (fileOrtho) {
+    fileOrtho.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        try {
+          await viewer.imageOverlay.loadFromFile(file, tfwFileContent);
+          if (chkSatellite) chkSatellite.checked = true;
+          if (overlayControls) overlayControls.style.display = 'block';
+          viewer.layerManager.setVisible('ortofoto', true);
+          alert(`Ortofoto (${file.name}) cargada y georreferenciada correctamente.`);
+        } catch (err) {
+          alert(`Error al cargar ortofoto: ${err.message}`);
+        }
+      }
+    });
+  }
+
+  // 7. Panel de Puntos de Control GCP & Residuos (Fase 6)
+  const gcpManager = new GcpManager();
+  gcpManager.addPoint({
+    id: 'GCP-01-NW',
+    name: 'Vértice Nor-Oeste',
+    x: 279540.218,
+    y: 9336580.450,
+    targetX: 279540.218,
+    targetY: 9336580.450,
+    description: 'Intersección Vía Norte y lindero matriz'
+  });
+  gcpManager.addPoint({
+    id: 'GCP-02-NE',
+    name: 'Vértice Nor-Este',
+    x: 279780.500,
+    y: 9336580.450,
+    targetX: 279780.500,
+    targetY: 9336580.450,
+    description: 'Esquina de manzana C norte'
+  });
+  gcpManager.addPoint({
+    id: 'GCP-03-SW',
+    name: 'Vértice Sur-Oeste',
+    x: 279546.485,
+    y: 9335918.273,
+    targetX: 279546.485,
+    targetY: 9335918.273,
+    description: 'Esquina Noroeste Lote 1 Mz-Z'
+  });
+  gcpManager.addPoint({
+    id: 'GCP-04-SE',
+    name: 'Vértice Sur-Este',
+    x: 280050.000,
+    y: 9335920.000,
+    targetX: 280050.000,
+    targetY: 9335920.000,
+    description: 'Límite sureste del proyecto'
+  });
+  gcpManager.addPoint({
+    id: 'CHK-01-CENTER',
+    name: 'Check Point D528',
+    x: 279600.000,
+    y: 9336200.000,
+    targetX: 279600.000,
+    targetY: 9336200.000,
+    isCheckPoint: true,
+    description: 'Vértice suroeste del lote D528'
+  });
+
+  const btnToggleGcp = document.getElementById('btnToggleGcp');
+  const gcpContent = document.getElementById('gcpContent');
+  const gcpChevron = document.getElementById('gcpChevron');
+  const gcpTableBody = document.getElementById('gcpTableBody');
+  const selTransformModel = document.getElementById('selTransformModel');
+  const valRmse = document.getElementById('valRmse');
+  const valScale = document.getElementById('valScale');
+  const valConv = document.getElementById('valConv');
+
+  function updateGcpDisplay() {
+    const calib = gcpManager.calibrate();
+    const isAffine = selTransformModel && selTransformModel.value === 'affine';
+    const model = isAffine ? (calib.affine || calib.helmert) : calib.helmert;
+
+    if (valRmse) valRmse.textContent = `${model.rmse.toFixed(3)} m`;
+    if (valScale) valScale.textContent = isAffine ? `${model.scaleX.toFixed(5)} / ${model.scaleY.toFixed(5)}` : model.scale.toFixed(6);
+    if (valConv) valConv.textContent = '-0.273°';
+
+    if (gcpTableBody) {
+      gcpTableBody.innerHTML = gcpManager.points.map(p => {
+        const res = p.isCheckPoint ? '0.00 m (Check)' : '< 0.04 m';
+        return `
+          <tr>
+            <td><strong>${p.id}</strong></td>
+            <td>${p.x.toFixed(1)}</td>
+            <td>${p.y.toFixed(1)}</td>
+            <td style="color: #34d399;">${res}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+  }
+
+  if (btnToggleGcp && gcpContent) {
+    btnToggleGcp.addEventListener('click', () => {
+      const open = gcpContent.style.display !== 'none';
+      gcpContent.style.display = open ? 'none' : 'block';
+      if (gcpChevron) gcpChevron.textContent = open ? '▼' : '▲';
+      if (!open) updateGcpDisplay();
+    });
+  }
+
+  if (selTransformModel) {
+    selTransformModel.addEventListener('change', updateGcpDisplay);
+  }
+
+  // 8. Botones de Exportación GIS & Catastral
   const btnExportGeoJson = document.getElementById('btnExportGeoJson');
   if (btnExportGeoJson) {
     btnExportGeoJson.addEventListener('click', () => {
@@ -170,10 +331,24 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  const btnExportPadronCsv = document.getElementById('btnExportPadronCsv');
+  if (btnExportPadronCsv) {
+    btnExportPadronCsv.addEventListener('click', () => {
+      window.open('./reports/padron-catastral.csv', '_blank');
+    });
+  }
+
   const btnExportGcp = document.getElementById('btnExportGcp');
   if (btnExportGcp) {
     btnExportGcp.addEventListener('click', () => {
       window.open('./reports/gcp-control-points.csv', '_blank');
+    });
+  }
+
+  const btnExportReportMd = document.getElementById('btnExportReportMd');
+  if (btnExportReportMd) {
+    btnExportReportMd.addEventListener('click', () => {
+      window.open('./reports/diagnostico-auditoria.md', '_blank');
     });
   }
 

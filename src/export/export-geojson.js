@@ -73,3 +73,4 @@ export function exportGeoJson(lotCandidates, options = {}) {
 
   return JSON.stringify(featureCollection, null, 2);
 }
+

@@ -130,3 +130,4 @@ fs.writeFileSync(georefReportPath, JSON.stringify({
 console.log(`  -> Guardado informe técnico de georreferenciación: ${georefReportPath}`);
 
 console.log('Generación de entregables de Fase 5 finalizada exitosamente.');
+

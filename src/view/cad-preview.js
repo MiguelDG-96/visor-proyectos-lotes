@@ -1,5 +1,6 @@
 import { LayerManager } from './layer-manager.js';
 import { MeasurementTool } from './measurement-tool.js';
+import { ImageOverlay } from './image-overlay.js';
 
 /**
  * Visor interactivo 2D en Canvas para previsualización de polígonos CAD (Fase 4)
@@ -24,6 +25,13 @@ export class CadPreviewViewer {
     // Gestor de capas y herramienta de medición
     this.layerManager = options.layerManager || new LayerManager();
     this.measurementTool = new MeasurementTool();
+    this.imageOverlay = options.imageOverlay || new ImageOverlay();
+
+    // Sincronizar visibilidad de imagen satelital con LayerManager
+    this.imageOverlay.visible = this.layerManager.isVisible('ortofoto');
+    this.imageOverlay.subscribe(() => {
+      this.render();
+    });
 
     // Paquete de datos vectoriales multicapa
     this.layersData = {
@@ -56,6 +64,7 @@ export class CadPreviewViewer {
 
     // Re-renderizar automáticamente al cambiar capas
     this.layerManager.subscribe(() => {
+      this.imageOverlay.visible = this.layerManager.isVisible('ortofoto');
       this.render();
     });
   }
@@ -328,6 +337,11 @@ export class CadPreviewViewer {
     // Fondo oscuro profesional CAD
     ctx.fillStyle = '#0d1117';
     ctx.fillRect(0, 0, width, height);
+
+    // 0. CAPA: Imagen Satelital / Ortofoto de Dron Georreferenciada (Fase 5, 6 y 7)
+    if (this.layerManager.isVisible('ortofoto') && this.imageOverlay) {
+      this.imageOverlay.render(ctx, (x, y) => this.cadToScreen(x, y));
+    }
 
     // 1. CAPA: Perímetro del proyecto (MATRIZ / PREDIO RURAL)
     if (this.layerManager.isVisible('perimetro') && this.layersData.perimetro.length > 0) {
