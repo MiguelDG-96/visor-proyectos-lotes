@@ -10,7 +10,8 @@
     "test": "node --test tests/*.test.js"
   },
   "dependencies": {
-    "dxf-parser": "1.1.2"
+    "dxf-parser": "1.1.2",
+    "vite": "^5.4.10"
   },
   "devDependencies": {
     "vite": "^5.4.10"

@@ -1,0 +1,110 @@
+{
+  "generatedAt": "2026-10-14T00:09:10.324Z",
+  "project": "Lotización Chávez Pata, Moyobamba, San Martín, Perú",
+  "inventorySummary": {
+    "totalEntities": 7759,
+    "layersCount": 29,
+    "blocksCount": 31
+  },
+  "lotValidation": {
+    "totalCandidates": 719,
+    "valid": 711,
+    "needsReview": 0,
+    "invalid": 6,
+    "superseded": 2,
+    "repairedOrReconstructed": 2,
+    "totalGroundAreaM2": 154408.78
+  },
+  "georeferencing": {
+    "datum": "WGS 84",
+    "projectedCrs": "EPSG:32718 (WGS 84 / UTM zone 18S)",
+    "geographicCrs": "EPSG:4326 (WGS 84 Lat/Lon)",
+    "ellipsoid": "WGS 84 (a=6378137.0m, 1/f=298.257223563)",
+    "centralMeridian": "-75° W",
+    "location": "Chávez Pata, Moyobamba, San Martín, Perú",
+    "geographicBbox": {
+      "minLat": -6.0052,
+      "maxLat": -5.9985,
+      "minLon": -76.9928,
+      "maxLon": -76.9855
+    },
+    "utmBbox": {
+      "minEasting": 279450,
+      "maxEasting": 280100,
+      "minNorthing": 9335800,
+      "maxNorthing": 9336650
+    },
+    "gridScaleFactorK": {
+      "min": 0.9996,
+      "max": 1.00025,
+      "mean": 1.00021,
+      "formula": "k ≈ k0 * (1 + (x - 500000)² / (2 * a² * k0²))"
+    },
+    "gcpCalibration": {
+      "recommendation": "Helmert 2D (Similitud Obligatoria)",
+      "justification": "El modelo afín deforma los lotes con una no-ortogonalidad de 51.44°. Rechazado para proteger la validez legal del plano.",
+      "helmertRmseMeters": 0,
+      "checkPointRmseMeters": 0
+    },
+    "calibratedLotsCount": 719,
+    "geoJsonFeaturesCount": 711,
+    "certifiedAt": "2026-10-13T23:56:39.916Z"
+  },
+  "auditTrail": [
+    {
+      "timestamp": "2026-10-13T23:34:38.930Z",
+      "entityHandle": "DA92",
+      "operation": "SNAP_CLOSURE",
+      "reason": "Cierre geométrico de brecha de 1.62 cm",
+      "details": {
+        "gap": 0.0162,
+        "newArea": 207.255126953125
+      }
+    },
+    {
+      "timestamp": "2026-10-13T23:34:38.931Z",
+      "entityHandle": "RECON-LT2",
+      "operation": "RECONSTRUCT_MISSING_LOT",
+      "reason": "Reconstrucción de Lote 2 a partir de cotas, texto y frontera residual entre Lote 3 y Lote 1",
+      "details": {
+        "vertices": [
+          [
+            279545.4462,
+            9335925.2728
+          ],
+          [
+            279569.895,
+            9335925.2728
+          ],
+          [
+            279569.8901,
+            9335918.2728
+          ],
+          [
+            279546.485,
+            9335918.2728
+          ]
+        ],
+        "area": 167.48828125
+      }
+    },
+    {
+      "timestamp": "2026-10-13T23:34:38.932Z",
+      "entityHandle": "DA4D",
+      "operation": "SUPERSEDE_DUPLICATE",
+      "reason": "Entidad borrador de 3 lados superada por el polígono cerrado definitivo D96C (Lote 6)",
+      "details": {
+        "validHandle": "D96C"
+      }
+    },
+    {
+      "timestamp": "2026-10-13T23:34:38.932Z",
+      "entityHandle": "DA4E",
+      "operation": "SUPERSEDE_DUPLICATE",
+      "reason": "Entidad borrador de 3 lados superada por el polígono cerrado definitivo DA93 (Lote 7)",
+      "details": {
+        "validHandle": "DA93"
+      }
+    }
+  ]
+}

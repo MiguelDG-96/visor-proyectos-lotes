@@ -1,0 +1,57 @@
+[
+  {
+    "timestamp": "2026-10-13T23:34:38.930Z",
+    "entityHandle": "DA92",
+    "operation": "SNAP_CLOSURE",
+    "reason": "Cierre geométrico de brecha de 1.62 cm",
+    "details": {
+      "gap": 0.0162,
+      "newArea": 207.255126953125
+    }
+  },
+  {
+    "timestamp": "2026-10-13T23:34:38.931Z",
+    "entityHandle": "RECON-LT2",
+    "operation": "RECONSTRUCT_MISSING_LOT",
+    "reason": "Reconstrucción de Lote 2 a partir de cotas, texto y frontera residual entre Lote 3 y Lote 1",
+    "details": {
+      "vertices": [
+        [
+          279545.4462,
+          9335925.2728
+        ],
+        [
+          279569.895,
+          9335925.2728
+        ],
+        [
+          279569.8901,
+          9335918.2728
+        ],
+        [
+          279546.485,
+          9335918.2728
+        ]
+      ],
+      "area": 167.48828125
+    }
+  },
+  {
+    "timestamp": "2026-10-13T23:34:38.932Z",
+    "entityHandle": "DA4D",
+    "operation": "SUPERSEDE_DUPLICATE",
+    "reason": "Entidad borrador de 3 lados superada por el polígono cerrado definitivo D96C (Lote 6)",
+    "details": {
+      "validHandle": "D96C"
+    }
+  },
+  {
+    "timestamp": "2026-10-13T23:34:38.932Z",
+    "entityHandle": "DA4E",
+    "operation": "SUPERSEDE_DUPLICATE",
+    "reason": "Entidad borrador de 3 lados superada por el polígono cerrado definitivo DA93 (Lote 7)",
+    "details": {
+      "validHandle": "DA93"
+    }
+  }
+]
