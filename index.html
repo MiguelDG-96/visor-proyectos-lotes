@@ -10,7 +10,16 @@
   <div id="sidebar">
     <div class="sidebar-header">
       <h1>Visor CAD Inmobiliario</h1>
-      <p>Superposición GIS & Exportación (Fase 6 & 7)</p>
+      <p>Superposición GIS & Inspección de Linderos</p>
+      
+      <!-- Selector de Proyecto CAD -->
+      <div class="project-selector" style="margin-top: 10px; padding: 6px 8px; background: rgba(30, 41, 59, 0.7); border-radius: 6px; border: 1px solid #334155;">
+        <label for="projectSelect" style="font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 4px;">Proyecto CAD Activo:</label>
+        <select id="projectSelect" class="form-select" style="width: 100%; font-size: 11px; font-weight: 700; color: #38bdf8; background: #0f172a; border: 1px solid #38bdf8; border-radius: 4px; padding: 4px 6px;">
+          <option value="alto-mayo" selected>📍 ALTO MAYO (Cerco Modificado — 2,993 Predios)</option>
+          <option value="chavez-pata">📍 CHÁVEZ PATA (Santa Anita — 717 Lotes)</option>
+        </select>
+      </div>
     </div>
 
     <!-- Buscador y Herramientas -->

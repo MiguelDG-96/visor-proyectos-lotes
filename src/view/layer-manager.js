@@ -8,12 +8,57 @@ export class LayerManager {
     this.layers = {
       perimetro: {
         id: 'perimetro',
-        name: 'Perímetro Proyecto',
+        name: 'Perímetro (Cerco Modificado)',
         category: 'perimetro',
         visible: true,
         color: '#f43f5e',
         lineWidth: 2.5,
-        description: 'Linderos del predio matriz y predios rurales'
+        description: 'Linderos del cerco perimétrico modificado'
+      },
+      capa0: {
+        id: 'capa0',
+        name: 'Capa 0 (Calles y Cierres)',
+        category: 'calles',
+        visible: true,
+        color: '#ffffff',
+        lineWidth: 1.5,
+        description: 'Ejes viales, frentes de lote y cierres de manzana'
+      },
+      lotesCad: {
+        id: 'lotesCad',
+        name: 'Capa LOTES (Linderos)',
+        category: 'lotes',
+        visible: true,
+        color: '#38bdf8',
+        lineWidth: 1.2,
+        description: 'Líneas divisorias y subdivisiones de lote'
+      },
+      azull: {
+        id: 'azull',
+        name: 'Capa AZULL (Bordes de Vía)',
+        category: 'calles',
+        visible: true,
+        color: '#3b82f6',
+        lineWidth: 1.2,
+        description: 'Bordes y alineamientos de calzada'
+      },
+      numerosLotes: {
+        id: 'numerosLotes',
+        name: 'Capa @NUMEROS DE LOTES',
+        category: 'textos',
+        visible: true,
+        color: '#fbbf24',
+        lineWidth: 1.0,
+        description: 'Numeración vectorial de lotes'
+      },
+      textos: {
+        id: 'textos',
+        name: 'Capa textos (Calles y Cotas)',
+        category: 'textos',
+        visible: true,
+        color: '#a78bfa',
+        lineWidth: 1.0,
+        description: 'Rótulos de calle y cotas de lote'
       },
       vias: {
         id: 'vias',
@@ -84,6 +129,22 @@ export class LayerManager {
         color: '#fbbf24',
         description: 'Dimensiones lineales y áreas rotuladas'
       },
+      cuadricula: {
+        id: 'cuadricula',
+        name: 'Cuadrícula UTM',
+        category: 'gis',
+        visible: true,
+        color: '#94a3b8',
+        description: 'Líneas de coordenadas UTM y grilla cartográfica'
+      },
+      puntosGeodesicos: {
+        id: 'puntosGeodesicos',
+        name: 'Puntos Geodésicos (BM)',
+        category: 'gis',
+        visible: true,
+        color: '#f59e0b',
+        description: 'Vértices y puntos de control geodésico BM-01'
+      },
       ortofoto: {
         id: 'ortofoto',
         name: 'Ortofoto / Satélite',
@@ -110,6 +171,15 @@ export class LayerManager {
    */
   getLayers() {
     return Object.values(this.layers);
+  }
+
+  /**
+   * Obtiene la definición de una capa por su identificador
+   * @param {string} layerId 
+   * @returns {Object|null}
+   */
+  getLayer(layerId) {
+    return this.layers[layerId] || null;
   }
 
   /**

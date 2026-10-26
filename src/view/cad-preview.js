@@ -39,7 +39,14 @@ export class CadPreviewViewer {
       vias: [],
       manzanaContornos: [],
       circulos: [],
-      cotas: []
+      cotas: [],
+      cuadricula: [],
+      puntosGeodesicos: [],
+      capa0: [],
+      lotesCad: [],
+      azull: [],
+      numerosLotes: [],
+      textos: []
     };
 
     // Estado de la cámara (pan / zoom)
@@ -80,7 +87,14 @@ export class CadPreviewViewer {
         vias: layersData.vias || [],
         manzanaContornos: layersData.manzanaContornos || [],
         circulos: layersData.circulos || [],
-        cotas: layersData.cotas || []
+        cotas: layersData.cotas || [],
+        cuadricula: layersData.cuadricula || [],
+        puntosGeodesicos: layersData.puntosGeodesicos || [],
+        capa0: layersData.capa0 || [],
+        lotesCad: layersData.lotesCad || [],
+        azull: layersData.azull || [],
+        numerosLotes: layersData.numerosLotes || [],
+        textos: layersData.textos || []
       };
       this._calculateBBox();
       this.render();
@@ -244,17 +258,7 @@ export class CadPreviewViewer {
     for (const lot of this.lots) {
       const vertices = lot.source.vertices;
       for (const pt of vertices) {
-        if (pt[0] < minX) minX = pt[0];
-        if (pt[0] > maxX) maxX = pt[0];
-        if (pt[1] < minY) minY = pt[1];
-        if (pt[1] > maxY) maxY = pt[1];
-      }
-    }
-
-    // Incluir perímetro en BBox si está disponible
-    if (this.layersData.perimetro.length > 0) {
-      for (const p of this.layersData.perimetro) {
-        for (const pt of p.vertices) {
+        if (pt[0] > 1000) {
           if (pt[0] < minX) minX = pt[0];
           if (pt[0] > maxX) maxX = pt[0];
           if (pt[1] < minY) minY = pt[1];
@@ -262,6 +266,39 @@ export class CadPreviewViewer {
         }
       }
     }
+
+    // Incluir perímetro en BBox si está disponible
+    if (this.layersData.perimetro?.length > 0) {
+      for (const p of this.layersData.perimetro) {
+        for (const pt of p.vertices) {
+          if (pt[0] > 1000) {
+            if (pt[0] < minX) minX = pt[0];
+            if (pt[0] > maxX) maxX = pt[0];
+            if (pt[1] < minY) minY = pt[1];
+            if (pt[1] > maxY) maxY = pt[1];
+          }
+        }
+      }
+    }
+
+    // Incluir capa 0 y lotesCad para ajustar la vista al plano completo
+    const checkPolylines = (list) => {
+      if (!list || list.length === 0) return;
+      for (const item of list) {
+        if (!item.vertices) continue;
+        for (const pt of item.vertices) {
+          if (pt[0] > 1000) {
+            if (pt[0] < minX) minX = pt[0];
+            if (pt[0] > maxX) maxX = pt[0];
+            if (pt[1] < minY) minY = pt[1];
+            if (pt[1] > maxY) maxY = pt[1];
+          }
+        }
+      }
+    };
+
+    checkPolylines(this.layersData.capa0);
+    checkPolylines(this.layersData.lotesCad);
 
     if (minX !== Infinity) {
       this.bbox = { minX, maxX, minY, maxY };
@@ -363,6 +400,44 @@ export class CadPreviewViewer {
       ctx.restore();
     }
 
+    // 1.5. CAPA: Cuadrícula de Coordenadas UTM
+    if (this.layerManager.isVisible('cuadricula') && this.layersData.cuadricula?.length > 0) {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.28)';
+      ctx.lineWidth = 1.0;
+      ctx.setLineDash([5, 5]);
+      for (const line of this.layersData.cuadricula) {
+        if (!line.vertices || line.vertices.length < 2) continue;
+        ctx.beginPath();
+        const p0 = this.cadToScreen(line.vertices[0][0], line.vertices[0][1]);
+        const p1 = this.cadToScreen(line.vertices[1][0], line.vertices[1][1]);
+        ctx.moveTo(p0.x, p0.y);
+        ctx.lineTo(p1.x, p1.y);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // 1.6. CAPA: Puntos Geodésicos de Control (BM)
+    if (this.layerManager.isVisible('puntosGeodesicos') && this.layersData.puntosGeodesicos?.length > 0) {
+      ctx.save();
+      ctx.strokeStyle = '#f59e0b';
+      ctx.fillStyle = '#f59e0b';
+      ctx.lineWidth = 2.0;
+      for (const pt of this.layersData.puntosGeodesicos) {
+        if (!pt.vertices || pt.vertices.length === 0) continue;
+        ctx.beginPath();
+        const p0 = this.cadToScreen(pt.vertices[0][0], pt.vertices[0][1]);
+        ctx.moveTo(p0.x, p0.y);
+        for (let i = 1; i < pt.vertices.length; i++) {
+          const p = this.cadToScreen(pt.vertices[i][0], pt.vertices[i][1]);
+          ctx.lineTo(p.x, p.y);
+        }
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
     // 2. CAPA: Vías y Calles (Líneas de borde y ejes)
     if (this.layerManager.isVisible('vias') && this.layersData.vias.length > 0) {
       ctx.save();
@@ -384,6 +459,69 @@ export class CadPreviewViewer {
           ctx.lineWidth = 1.2;
           ctx.setLineDash([]);
         }
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // 2.2. CAPA: AZULL (Bordes de Vía y Alineamientos)
+    if (this.layerManager.isVisible('azull') && this.layersData.azull?.length > 0) {
+      ctx.save();
+      const azLayer = this.layerManager.getLayer?.('azull') || this.layerManager.layers?.azull;
+      ctx.strokeStyle = azLayer?.color || '#3b82f6';
+      ctx.lineWidth = azLayer?.lineWidth || 1.2;
+      for (const poly of this.layersData.azull) {
+        if (!poly.vertices || poly.vertices.length < 2) continue;
+        ctx.beginPath();
+        const p0 = this.cadToScreen(poly.vertices[0][0], poly.vertices[0][1]);
+        ctx.moveTo(p0.x, p0.y);
+        for (let i = 1; i < poly.vertices.length; i++) {
+          const pt = this.cadToScreen(poly.vertices[i][0], poly.vertices[i][1]);
+          ctx.lineTo(pt.x, pt.y);
+        }
+        if (poly.closed) ctx.closePath();
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // 2.3. CAPA: Capa 0 (Calles, Ejes, Frentes de Lote y Cierres)
+    if (this.layerManager.isVisible('capa0') && this.layersData.capa0?.length > 0) {
+      ctx.save();
+      const c0Layer = this.layerManager.getLayer?.('capa0') || this.layerManager.layers?.capa0;
+      ctx.strokeStyle = c0Layer?.color || '#ffffff';
+      ctx.lineWidth = c0Layer?.lineWidth || 1.5;
+      for (const poly of this.layersData.capa0) {
+        if (!poly.vertices || poly.vertices.length < 2) continue;
+        ctx.beginPath();
+        const p0 = this.cadToScreen(poly.vertices[0][0], poly.vertices[0][1]);
+        ctx.moveTo(p0.x, p0.y);
+        for (let i = 1; i < poly.vertices.length; i++) {
+          const pt = this.cadToScreen(poly.vertices[i][0], poly.vertices[i][1]);
+          ctx.lineTo(pt.x, pt.y);
+        }
+        if (poly.closed) ctx.closePath();
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // 2.4. CAPA: LOTES CAD (Linderos divisorios y peines de lotes)
+    if (this.layerManager.isVisible('lotesCad') && this.layersData.lotesCad?.length > 0) {
+      ctx.save();
+      const lotLayer = this.layerManager.getLayer?.('lotesCad') || this.layerManager.layers?.lotesCad;
+      ctx.strokeStyle = lotLayer?.color || '#38bdf8';
+      ctx.lineWidth = lotLayer?.lineWidth || 1.2;
+      for (const poly of this.layersData.lotesCad) {
+        if (!poly.vertices || poly.vertices.length < 2) continue;
+        ctx.beginPath();
+        const p0 = this.cadToScreen(poly.vertices[0][0], poly.vertices[0][1]);
+        ctx.moveTo(p0.x, p0.y);
+        for (let i = 1; i < poly.vertices.length; i++) {
+          const pt = this.cadToScreen(poly.vertices[i][0], poly.vertices[i][1]);
+          ctx.lineTo(pt.x, pt.y);
+        }
+        if (poly.closed) ctx.closePath();
         ctx.stroke();
       }
       ctx.restore();
@@ -538,6 +676,48 @@ export class CadPreviewViewer {
           ctx.fillText(lot.attributes.numeroLote, screenCentroid.x, screenCentroid.y);
         }
       }
+    }
+
+    // 7.5. CAPA: @NUMEROS DE LOTES (Trazos Vectoriales CAD)
+    if (this.layerManager.isVisible('numerosLotes') && this.layersData.numerosLotes?.length > 0) {
+      ctx.save();
+      const numLayer = this.layerManager.getLayer?.('numerosLotes') || this.layerManager.layers?.numerosLotes;
+      ctx.strokeStyle = numLayer?.color || '#fbbf24';
+      ctx.lineWidth = numLayer?.lineWidth || 1.0;
+      for (const poly of this.layersData.numerosLotes) {
+        if (!poly.vertices || poly.vertices.length < 2) continue;
+        ctx.beginPath();
+        const p0 = this.cadToScreen(poly.vertices[0][0], poly.vertices[0][1]);
+        ctx.moveTo(p0.x, p0.y);
+        for (let i = 1; i < poly.vertices.length; i++) {
+          const pt = this.cadToScreen(poly.vertices[i][0], poly.vertices[i][1]);
+          ctx.lineTo(pt.x, pt.y);
+        }
+        if (poly.closed) ctx.closePath();
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // 7.6. CAPA: textos (Trazos Vectoriales de Calles y Cotas)
+    if (this.layerManager.isVisible('textos') && this.layersData.textos?.length > 0) {
+      ctx.save();
+      const txtLayer = this.layerManager.getLayer?.('textos') || this.layerManager.layers?.textos;
+      ctx.strokeStyle = txtLayer?.color || '#a78bfa';
+      ctx.lineWidth = txtLayer?.lineWidth || 1.0;
+      for (const poly of this.layersData.textos) {
+        if (!poly.vertices || poly.vertices.length < 2) continue;
+        ctx.beginPath();
+        const p0 = this.cadToScreen(poly.vertices[0][0], poly.vertices[0][1]);
+        ctx.moveTo(p0.x, p0.y);
+        for (let i = 1; i < poly.vertices.length; i++) {
+          const pt = this.cadToScreen(poly.vertices[i][0], poly.vertices[i][1]);
+          ctx.lineTo(pt.x, pt.y);
+        }
+        if (poly.closed) ctx.closePath();
+        ctx.stroke();
+      }
+      ctx.restore();
     }
 
     // 8. CAPA: Círculos de número de lote
